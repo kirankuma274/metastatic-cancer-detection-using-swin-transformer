@@ -61,3 +61,7 @@ async def predict(file: UploadFile = File(...)):
         prob = F.softmax(output, dim=1)[0, 1].item()
         pred = "Cancer" if output.argmax(dim=1).item() == 1 else "Normal"
     return {"prediction": pred, "probability": prob}
+if __name__ == "__main__":
+    import os, uvicorn
+    port = int(os.environ.get("PORT", 8000))  # 8000 is default for local testing
+    uvicorn.run("app:app", host="0.0.0.0", port=port, reload=True)
