@@ -10,7 +10,7 @@ import os, requests
 
 # Hugging Face model URL (after you upload it there)
 MODEL_PATH = "best_swin_model.pth"
-MODEL_URL = "https://huggingface.co/kirankumar274/best_swin_model.pth/blob/main/best_swin_model.pth"
+MODEL_URL = "https://huggingface.co/kirankumar274/best_swin_model.pth/resolve/main/best_swin_model.pth"
 
 # Download model if not already present
 if not os.path.exists(MODEL_PATH):
@@ -27,10 +27,11 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = timm.create_model("swin_tiny_patch4_window7_224", pretrained=False, num_classes=2)
 
 # Load trained weights
-state_dict = torch.load(MODEL_PATH, map_location=device)
+state_dict = torch.load(MODEL_PATH, map_location=device, weights_only=False)
 model.load_state_dict(state_dict)
 model = model.to(device)
 model.eval()
+
 
 # Transform (same as training)
 transform = transforms.Compose([
