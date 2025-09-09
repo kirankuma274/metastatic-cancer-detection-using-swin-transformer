@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cancer Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        .images-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .images-container img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .images-container img:hover {
+            transform: scale(1.05);
+            border: 2px solid #4CAF50;
+        }
+
+        #result {
+            margin-top: 30px;
+            font-weight: bold;
+            color: #222;
+            text-align: center;
+        }
+
+        input[type="file"] {
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h2>Metastatic Cancer Prediction</h2>
+
+    <!-- Upload section -->
+    <input type="file" id="fileInput" />
+    <button onclick="uploadFile()">Predict Uploaded Image</button>
+
+    <!-- Example images -->
+    <h3>Or click an example image:</h3>
+    <div class="images-container">
+        <img src="images/patch_0_154241.png" alt="Example 1">
+        <img src="images/patch_1_76889.png" alt="Example 2">
+        <img src="images/patch_4_152019.png" alt="Example 5">
+         <img src="images/patch_2_140972.png" alt="Example 3">
+        <img src="images/patch_5_258966.png" alt="Example 6">
+        <img src="images/patch_6_202357.png" alt="Example 7"> 
+         <img src="images/patch_3_131879.png" alt="Example 4">
+        <img src="images/patch_7_119737.png" alt="Example 8"> 
+        <img src="images/patch_1_76889.png" alt="Example 2">
+         <img src="images/patch_8_83146.png" alt="Example 9">
+        <img src="images/patch_9_117474.png" alt="Example 10">
+        <!-- Add more images as needed -->
+    </div>
+
+    <p id="result"></p>
+
+    <script>
+        const resultText = document.getElementById("result");
+
+        // Upload image button
+        async function uploadFile() {
+            const fileInput = document.getElementById("fileInput");
+            if (!fileInput.files.length) {
+                alert("Please select an image to upload!");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            resultText.innerText = "Predicting...";
+
+            try {
+                const res = await fetch("http://127.0.0.1:8000/predict", {
+                    method: "POST",
+                    body: formData
+                });
+                const result = await res.json();
+                resultText.innerText = `Prediction: ${result.prediction}\nProbability: ${result.probability.toFixed(4)}`;
+            } catch (err) {
+                resultText.innerText = "Error: " + err;
+            }
+        }
+
+        // Click example images
+        const images = document.querySelectorAll(".images-container img");
+        images.forEach(img => {
+            img.addEventListener("click", async () => {
+                resultText.innerText = "Predicting...";
+
+                const response = await fetch(img.src);
+                const blob = await response.blob();
+                const formData = new FormData();
+                formData.append("file", blob, "image.jpg");
+
+                try {
+                    const res = await fetch("http://127.0.0.1:8000/predict", {
+                        method: "POST",
+                        body: formData
+                    });
+                    const result = await res.json();
+                    resultText.innerText = `Prediction: ${result.prediction}\nProbability: ${result.probability.toFixed(4)}`;
+                } catch (err) {
+                    resultText.innerText = "Error: " + err;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
